@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: order-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: order_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "0.0.0.0:5439:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-order_service}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - order-network
+
+volumes:
+  postgres_data:
+
+networks:
+  order-network:
+    driver: bridge

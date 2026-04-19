@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Food {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  description String?
+  createdAt   DateTime @default(now())
+  orders      Order[]
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  foodId     Int[]         
+  quantity   Int
+  address    String
+  phone     String
+  paymentMethod String
+  totalPrice Decimal     @db.Decimal(10, 2)
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  food Food @relation(fields: [foodId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([foodId])
+}
